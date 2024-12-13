@@ -1,0 +1,53 @@
+body{
+    background-color: black;
+    color: whitesmoke;
+}
+#container{
+    border: 1px solid white;
+    width: 90%;
+    height: 95vh;
+    margin: auto;
+}
+p{
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    font-size: 20px;
+    font-style: italic;
+    border-bottom: 1px dashed whitesmoke;
+}
+#form{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    justify-items: center;
+    padding-bottom: 30px;
+    border-bottom: 3px double whitesmoke;
+} 
+fieldset{
+    width: 250px;
+}
+input{
+    width: 240px; 
+}
+#submit{
+    width: 100px;
+    height: 40px;
+}
+table{
+    border: 1px solid white;
+    width: 90%;
+    margin: auto;
+    margin-top: 15px;
+}
+table td{
+    border-right: 1px solid white;
+    text-align: center;
+    height: 30px;
+}
+table td:second-child{
+    width:350px;
+}
+table td:last-child{
+    border-right: none;
+}
