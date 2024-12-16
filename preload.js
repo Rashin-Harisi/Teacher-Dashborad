@@ -5,8 +5,8 @@ contextBridge.exposeInMainWorld(
   {
     sendData : (data)=>ipcRenderer.invoke("sendData",data),
     getData : ()=>ipcRenderer.invoke("getData"),
-    editData : (id)=>ipcRenderer.invoke("editData", id),
-    updateData : (data) => ipcRenderer.invoke("updateData", data),
+    editData : (data)=>ipcRenderer.invoke("editData", data),
+    deleteData : (id) => ipcRenderer.invoke("deleteData", id),
   }
 )
 

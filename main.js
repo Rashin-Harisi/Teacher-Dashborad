@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, screen } = require("electron");
 const path = require("node:path");
 const sqlite3 = require("sqlite3").verbose();
 
+
 const dbPath = path.join(__dirname, "database.sqlite");
 const db = new sqlite3.Database(dbPath, (error) => {
   if (error) {
@@ -53,12 +54,43 @@ ipcMain.handle("getData", async (event, arg) => {
     });
   });
 });
-ipcMain.handle("editData", (event, arg) => {
-  const id = arg;
-  ipcMain.handle("updateData", (event, arg) => {
-    console.log(arg);
-  });
-});
+ipcMain.handle("editData", async(event, arg) => {
+  const {id,name,score,status} = arg
+  try {
+    await new Promise((resolve, reject)=>{
+      db.run(`UPDATE students SET name=?,score=?,status=? WHERE id=?`, [name,score,status,id], (error)=>{
+        if(error){
+          reject()
+        }else{
+          resolve()
+        }
+      })
+    })
+    const updateUser = {id,name,score,status}
+    return  {success: true, message: "Data updated successfully.", newData: updateUser }
+  } catch (error) {
+    return {success: false, message: "Something went wrong in updating process." }
+  }
+})
+
+
+ipcMain.handle("deleteData",async(event,arg)=>{
+  const id = arg
+ try {
+  await new Promise((resolve,reject)=>{
+    db.run(`DELETE FROM students WHERE id=?`,[id],(error)=>{
+      if(error){
+        reject()
+      }else{
+        resolve()
+      }
+    })
+  })
+  return {success: true, message: "Data deleted successfully." }
+ } catch (error) {
+  return {success: false, message: "Something went wrong in deleting process." }
+ }
+})
 
 const createWindow = () => {
   const display = screen.getPrimaryDisplay().workAreaSize;

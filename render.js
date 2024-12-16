@@ -1,12 +1,14 @@
+
 document.addEventListener("DOMContentLoaded", async () => {
   const response = await window.api.getData();
+  
 
   let studentName = document.getElementById("name");
   let score = document.getElementById("score");
   let status = document.getElementById("status");
   let submitBTN = document.getElementById("submit");
-  let form = document.getElementById("form");
   let table = document.getElementById("table");
+  let idUpdate
 
 
   submitBTN.addEventListener("click", async() => {
@@ -18,26 +20,47 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Score should be between 0 to 100");
       return;
     }
-    const response =await  window.api.sendData({
-      name: studentName.value,
-      score: score.value,
-      status: status.value,
-    });
-    if(response.success){
-        const res = await window.api.getData();
-        const newStudent = {
-          id: res.length ++,
-          name: response.newData.name,
-          score: response.newData.score,
-          status: response.newData.status,
-        }
-        addDataToTable(newStudent)
-        studentName.value = "";
+    if(submitBTN.textContent === "Submit"){
+      const response =await  window.api.sendData({
+        name: studentName.value,
+        score: score.value,
+        status: status.value,
+      });
+      if(response.success){
+          const res = await window.api.getData();
+          const newRecord = res.filter(item=> item.name === response.newData.name)
+          const newStudent = {
+            id: newRecord[0].id,
+            name: response.newData.name,
+            score: response.newData.score,
+            status: response.newData.status,
+          }
+          addDataToTable(newStudent)
+          studentName.value = "";
+          score.value = "";
+          status.value = "";
+      }else{
+          alert(response.message)
+      }
+    }else{
+      const res = await window.api.editData({
+        id : idUpdate,
+        name : studentName.value,
+        score: score.value,
+        status : status.value
+      })
+      if(res.success){
+        const updateStudent = res.newData
+        updateTable(updateStudent)
+        studentName.value = ""; 
         score.value = "";
         status.value = "";
-    }else{
+        submitBTN.textContent = "Submit";
+      }else{
         alert(response.message)
+      }
     }
+    
     
   });
 
@@ -63,9 +86,10 @@ function addDataToTable (item){
     let editBTN = document.createElement("button");
     editBTN.textContent = "Edit";
     editBTN.addEventListener("click", () => {
-      studentName.value = element.name;
-      score.value = element.score;
-      status.value = element.status;
+      studentName.value = item.name;
+      score.value = item.score; 
+      status.value = item.status;
+      idUpdate = item.id
       submitBTN.textContent = "Edit";
     });
     btnCell.appendChild(editBTN);
@@ -74,8 +98,12 @@ function addDataToTable (item){
     let btnCell2 = document.createElement("td");
     let removeBTN = document.createElement("button");
     removeBTN.textContent = "Remove";
-    removeBTN.addEventListener("click", () => {
-      console.log("Remove clicked");
+    removeBTN.addEventListener("click", async() => {
+      const res = await window.api.deleteData(item.id)
+      console.log(res);
+      if(res.success){
+        deleteRecord(item.id)
+      }
     });
     btnCell2.appendChild(removeBTN);
     newRow.appendChild(btnCell2);
@@ -84,3 +112,46 @@ function addDataToTable (item){
 }
 
 })
+
+function updateTable (data){
+  const rows = Array.from(table.rows);
+  try {
+    rows.forEach((row)=>{
+      if(row.cells[0].textContent === String(data.id)){
+        row.cells[1].textContent = data.name
+        row.cells[2].textContent = data.score
+        row.cells[3].textContent = data.status
+        
+
+        console.log( Number(data.score));
+        if(Number(data.score) < 50){
+          row.cells[0].style.color = "red"
+          row.cells[1].style.color = "red"
+          row.cells[2].style.color = "red"
+          row.cells[3].style.color = "red"
+        }else {
+          row.cells[0].style.color = "green"
+          row.cells[1].style.color = "green"
+          row.cells[2].style.color = "green"
+          row.cells[3].style.color = "green"
+        }
+      } 
+    })
+    
+  } catch (error) {
+    console.log(error);
+  }
+      
+}
+function deleteRecord(id){
+  const rows = Array.from(table.rows);
+  try {
+    rows.forEach((row)=>{
+      if(row.cells[0].textContent === String(id)){
+        row.remove()
+      }
+    })
+  }catch(error){
+    console.log(error);
+  }
+}
